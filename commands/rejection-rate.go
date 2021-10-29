@@ -22,17 +22,8 @@ func RejectionRate(owner string, repo string, limit int) {
 	stats := getStatsByUser(owner, repo, limit)
 	fmt.Println("\nResults:")
 	if stats != nil {
-		sumRate := 0.0
-		ratesCount := 0
-		for username, userStats := range stats {
-			rate := calculateRejectionRatePerUser(userStats)
-			fmt.Printf("@%s's rejection rate is: %.2f%% (%d/%d)\n", username, rate, userStats.Rejected, userStats.Total)
-			sumRate += rate
-			ratesCount += 1
-		}
-
-		aggregatedRate := float64(sumRate) / float64(ratesCount)
-		fmt.Printf("\nAggregated rejection rate is: %.2f%% (From %d Devs)\n", aggregatedRate, ratesCount)
+		aggregatedRate := calculateAggregatedRate(stats)
+		fmt.Printf("\nAggregated rejection rate is: %.2f%% (From %d Devs)\n", aggregatedRate, len(stats))
 	}
 }
 
@@ -51,12 +42,7 @@ func getStatsByUser(owner string, repo string, limit int) map[string]UserRejecti
 		prNumber := *pr.Number
 		fmt.Printf("%d/%d Processing PR #%d created by %s\n", i+1, limit, prNumber, username)
 
-		if _, ok := statsByUser[username]; !ok {
-			statsByUser[username] = UserRejectionRateStatistic{
-				Username: username,
-			}
-		}
-
+		tryCreateUserStats(statsByUser, username)
 		userStats := statsByUser[username]
 		userStats.Total += 1
 		reviews, err := gh.GetPullRequestReviews(client, owner, repo, prNumber)
@@ -72,12 +58,33 @@ func getStatsByUser(owner string, repo string, limit int) map[string]UserRejecti
 				break
 			}
 		}
+
+		userStats.Rate = calculateRejectionRatePerUser(userStats)
 		statsByUser[username] = userStats
 	}
 
 	return statsByUser
 }
 
+func tryCreateUserStats(stats map[string]UserRejectionRateStatistic, username string) {
+	if _, ok := stats[username]; !ok {
+		stats[username] = UserRejectionRateStatistic{
+			Username: username,
+		}
+	}
+}
+
 func calculateRejectionRatePerUser(rejectionStats UserRejectionRateStatistic) float64 {
 	return float64(rejectionStats.Rejected) / float64(rejectionStats.Total) * 100
+}
+
+func calculateAggregatedRate(stats map[string]UserRejectionRateStatistic) float64 {
+	sumRate := 0.0
+	for username, userStats := range stats {
+		rate := calculateRejectionRatePerUser(userStats)
+		fmt.Printf("@%s's rejection rate is: %.2f%% (%d/%d)\n", username, rate, userStats.Rejected, userStats.Total)
+		sumRate += rate
+	}
+
+	return float64(sumRate) / float64(len(stats))
 }
