@@ -27,6 +27,7 @@ func RejectionRate(owner string, repo string, limit int) {
 	}
 }
 
+// Helper methods
 func getStatsByUser(owner string, repo string, limit int) map[string]UserRejectionRateStatistic {
 	client := gh.GetClient()
 
