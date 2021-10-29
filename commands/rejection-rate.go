@@ -32,7 +32,7 @@ func RejectionRate(owner string, repo string, limit int) {
 		}
 
 		aggregatedRate := float64(sumRate) / float64(ratesCount)
-		fmt.Printf("\nAggregated rejection rate is: %.2f%%\n", aggregatedRate)
+		fmt.Printf("\nAggregated rejection rate is: %.2f%% (From %d Devs)\n", aggregatedRate, ratesCount)
 	}
 }
 
