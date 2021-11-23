@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aogz/perforator/gh"
+	"github.com/aogz/perforator/utils"
 	"github.com/google/go-github/v39/github"
 )
 
@@ -19,18 +20,18 @@ func ReviewTime(owner string, repo string, limit int, groupBy string) {
 
 	stats := map[string][]time.Duration{}
 	if groupBy == "author" {
-		stats = calculateReviewTimeByAuthor(stats, prs)
+		stats = calculateReviewTimeByAuthor(stats, prs, limit)
 	} else {
-		stats = calculateReviewTimeByReviewer(stats, prs, client)
+		stats = calculateReviewTimeByReviewer(stats, prs, client, limit)
 	}
 
 	calculateAggregatedResultsPerUser(stats)
 }
 
-func calculateReviewTimeByAuthor(stats map[string][]time.Duration, prs []*github.PullRequest) map[string][]time.Duration {
+func calculateReviewTimeByAuthor(stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
 		username := *pr.User.Login
-		fmt.Printf("%d Processing PR #%d created by %s\n", i+1, *pr.Number, username)
+		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, username))
 
 		inReviewTime := calculatePRInReviewTime(pr)
 		if inReviewTime > 0 {
@@ -41,9 +42,9 @@ func calculateReviewTimeByAuthor(stats map[string][]time.Duration, prs []*github
 	return stats
 }
 
-func calculateReviewTimeByReviewer(stats map[string][]time.Duration, prs []*github.PullRequest, client *github.Client) map[string][]time.Duration {
+func calculateReviewTimeByReviewer(stats map[string][]time.Duration, prs []*github.PullRequest, client *github.Client, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
-		fmt.Printf("%d Processing PR #%d created by %s\n", i+1, *pr.Number, *pr.User.Login)
+		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, *pr.User.Login))
 		reviews, err := gh.GetPullRequestReviews(client, *pr.Base.Repo.Owner.Login, *pr.Base.Repo.Name, *pr.Number)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -60,7 +61,7 @@ func calculateReviewTimeByReviewer(stats map[string][]time.Duration, prs []*gith
 }
 
 func calculateAggregatedResultsPerUser(stats map[string][]time.Duration) float64 {
-	fmt.Println("-----")
+	utils.ClearPrint("-----")
 	var sumAggregatedDurationInHours float64
 	for username, durations := range stats {
 		averageReviewTime := calculateAverageReviewTimePerUser(durations)

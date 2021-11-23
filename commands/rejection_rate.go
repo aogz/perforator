@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aogz/perforator/gh"
+	"github.com/aogz/perforator/utils"
 )
 
 // RejectedStatus is status that marks PR as rejected
@@ -20,7 +21,7 @@ type UserRejectionRateStatistic struct {
 // RejectionRate shows percentage of rejected PRs
 func RejectionRate(owner string, repo string, limit int) {
 	stats := getStatsByUser(owner, repo, limit)
-	fmt.Println("\nResults:")
+	utils.ClearPrint("-----")
 	if stats != nil {
 		aggregatedRate := calculateAggregatedRate(stats)
 		fmt.Printf("\nAggregated rejection rate is: %.2f%% (From %d Devs)\n", aggregatedRate, len(stats))
@@ -41,7 +42,9 @@ func getStatsByUser(owner string, repo string, limit int) map[string]UserRejecti
 	for i, pr := range prs {
 		username := *pr.User.Login
 		prNumber := *pr.Number
-		fmt.Printf("%d/%d Processing PR #%d created by %s\n", i+1, limit, prNumber, username)
+		prCreateAt := *pr.CreatedAt
+
+		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, prNumber, prCreateAt, username))
 
 		tryCreateUserStats(statsByUser, username)
 		userStats := statsByUser[username]
