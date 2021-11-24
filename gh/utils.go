@@ -50,6 +50,11 @@ func GetPRs(client *github.Client, owner string, repo string, limit int) ([]*git
 	return pullRequestList, nil
 }
 
+func GetPullRequestTimeline(client *github.Client, owner string, repo string, prNumber int) ([]*github.Timeline, error) {
+	timeline, _, err := client.Issues.ListIssueTimeline(context.Background(), owner, repo, prNumber, nil)
+	return timeline, err
+}
+
 func GetPullRequestReviews(client *github.Client, owner string, repo string, prNumber int) ([]*github.PullRequestReview, error) {
 	reviews, _, err := client.PullRequests.ListReviews(context.Background(), owner, repo, prNumber, nil)
 	return reviews, err
