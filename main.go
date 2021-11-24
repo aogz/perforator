@@ -31,7 +31,6 @@ func main() {
 
 	prRejectionRateCmd := flag.NewFlagSet(rejectionRate, flag.ExitOnError)
 	prReviewTimeCmd := flag.NewFlagSet(reviewTime, flag.ExitOnError)
-	groupBy := prReviewTimeCmd.String("group-by", "reviewer", "Criteria to group by. Accepted values: author or reviewer")
 
 	if *helpCmd {
 		fmt.Println("Usage: `$ perforator [command] [--help] [flags]`")
@@ -51,6 +50,7 @@ func main() {
 		owner, repoName := utils.ParseRepo(*repo)
 		commands.RejectionRate(owner, repoName, *limit)
 	case reviewTime:
+		groupBy := prReviewTimeCmd.String("group-by", "reviewer", "Criteria to group by. Accepted values: author or reviewer")
 		repo, limit = addDefaultArgs(prReviewTimeCmd)
 		owner, repoName := utils.ParseRepo(*repo)
 		commands.ReviewTime(owner, repoName, *limit, *groupBy)
