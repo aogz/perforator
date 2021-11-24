@@ -51,7 +51,7 @@ func TestCalculateReviewTimeByAuthor(t *testing.T) {
 	}
 
 	initial := map[string][]time.Duration{}
-	result := calculateReviewTimeByAuthor(initial, prs)
+	result := calculateReviewTimeByAuthor(initial, prs, 100)
 	if len(result) != 2 {
 		t.Fatalf("Unexpected result length, expected 2 got %d", len(result))
 	}
