@@ -6,7 +6,7 @@ import (
 
 	"github.com/aogz/perforator/gh"
 	"github.com/aogz/perforator/utils"
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v40/github"
 )
 
 // ReviewTime shows average review time per pr author or reviewer
@@ -20,29 +20,33 @@ func ReviewTime(owner string, repo string, limit int, groupBy string) {
 
 	stats := map[string][]time.Duration{}
 	if groupBy == "author" {
-		stats = calculateReviewTimeByAuthor(stats, prs, limit)
+		stats = calculateReviewTimeByAuthor(client, stats, prs, limit)
 	} else {
-		stats = calculateReviewTimeByReviewer(stats, prs, client, limit)
+		stats = calculateReviewTimeByReviewer(client, stats, prs, limit)
 	}
 
 	calculateAggregatedResultsPerUser(stats)
 }
 
-func calculateReviewTimeByAuthor(stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
+func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
 		username := *pr.User.Login
 		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, username))
 
-		inReviewTime := calculatePRInReviewTime(pr)
-		if inReviewTime > 0 {
-			stats[username] = append(stats[username], inReviewTime)
+		if pr.MergedAt != nil {
+			inReviewTime := calculatePRInReviewTime(client, pr)
+			if inReviewTime > 0 {
+				stats[username] = append(stats[username], inReviewTime)
+			}
+		} else {
+			fmt.Println("PR is not merged yet, skipping..")
 		}
 	}
 
 	return stats
 }
 
-func calculateReviewTimeByReviewer(stats map[string][]time.Duration, prs []*github.PullRequest, client *github.Client, limit int) map[string][]time.Duration {
+func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
 		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, *pr.User.Login))
 		reviews, err := gh.GetPullRequestReviews(client, *pr.Base.Repo.Owner.Login, *pr.Base.Repo.Name, *pr.Number)
@@ -78,14 +82,28 @@ func calculateUserReviewTime(pr *github.PullRequest, review *github.PullRequestR
 	return reviewedAt.Sub(*pr.CreatedAt)
 }
 
-func calculatePRInReviewTime(pr *github.PullRequest) time.Duration {
+func calculatePRInReviewTime(client *github.Client, pr *github.PullRequest) time.Duration {
 	var inReviewTime time.Duration
-	createdAt := *pr.CreatedAt
-	if pr.MergedAt != nil {
-		mergedAt := *pr.MergedAt
-		inReviewTime = mergedAt.Sub(createdAt)
+	previousReviewPeriodStartTime := *pr.CreatedAt
+	timeline, err := gh.GetPullRequestTimeline(client, pr)
+	if err != nil {
+		panic(err.Error())
 	}
 
+	for _, event := range timeline {
+		eventType := *event.Event
+		switch eventType {
+		case "ready_for_review":
+			previousReviewPeriodStartTime = *event.CreatedAt
+		case "convert_to_draft":
+			eventCreatedAt := *event.CreatedAt
+			inReviewTime += eventCreatedAt.Sub(previousReviewPeriodStartTime)
+			previousReviewPeriodStartTime = *event.CreatedAt
+		}
+	}
+
+	mergedAt := *pr.MergedAt
+	inReviewTime = mergedAt.Sub(previousReviewPeriodStartTime)
 	return inReviewTime
 }
 

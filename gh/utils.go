@@ -2,13 +2,11 @@ package gh
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/aogz/perforator/utils"
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v40/github"
 )
 
 const MAX_PER_PAGE = 100
@@ -52,41 +50,24 @@ func GetPRs(client *github.Client, owner string, repo string, limit int) ([]*git
 	return pullRequestList, nil
 }
 
-func GetPullRequestTimeline(client *github.Client, owner string, repo string, prNumber int) ([]*github.Timeline, error) {
-	timeline, _, err := client.Issues.ListIssueTimeline(context.Background(), owner, repo, prNumber, nil)
+// GetPullRequestTimeline ...
+func GetPullRequestTimeline(client *github.Client, pr *github.PullRequest) ([]*github.Timeline, error) {
+	options := &github.ListOptions{
+		PerPage: MAX_PER_PAGE,
+	}
+	timeline, _, err := client.Issues.ListIssueTimeline(context.Background(), *pr.Head.Repo.Owner.Login, *pr.Head.Repo.Name, *pr.Number, options)
 	return timeline, err
 }
 
 func GetPullRequestReviews(client *github.Client, owner string, repo string, prNumber int) ([]*github.PullRequestReview, error) {
-	reviews, _, err := client.PullRequests.ListReviews(context.Background(), owner, repo, prNumber, nil)
+	options := &github.ListOptions{
+		PerPage: MAX_PER_PAGE,
+	}
+	reviews, _, err := client.PullRequests.ListReviews(context.Background(), owner, repo, prNumber, options)
 	return reviews, err
 }
 
-func GetPullRequestReviewStartTime(client *github.Client, owner string, repo string, prNumber int) (time.Time, error) {
-	pr, _, _ := client.PullRequests.Get(context.Background(), owner, repo, prNumber)
-	timeline, err := GetPullRequestTimeline(client, owner, repo, prNumber)
-	if err != nil {
-		panic(err)
-	}
-
-	isReadyForReview := true
-	reviewStartTime := *pr.CreatedAt
-	for _, event := range timeline {
-		eventType := *event.Event
-		switch eventType {
-		case "ready_for_review":
-			isReadyForReview = true
-			reviewStartTime = *event.CreatedAt
-		case "convert_to_draft":
-			isReadyForReview = false
-		}
-
-		fmt.Println(*event.Event, *event.CreatedAt)
-	}
-
-	if !isReadyForReview {
-		return reviewStartTime, errors.New("PR is not ready for review")
-	}
-
-	return reviewStartTime, nil
+func GetPullRequest(client *github.Client, owner string, repo string, prNumber int) (*github.PullRequest, error) {
+	pr, _, err := client.PullRequests.Get(context.Background(), owner, repo, prNumber)
+	return pr, err
 }
