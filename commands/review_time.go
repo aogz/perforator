@@ -116,7 +116,7 @@ func calculateAggregatedResultsPerUser(stats map[string][]time.Duration) float64
 	for username, durations := range stats {
 		averageReviewTime := calculateAverageReviewTimePerUser(durations)
 		sumAggregatedDurationInHours += averageReviewTime
-		fmt.Printf("@%s's average review time is: %.2f hours\n", username, averageReviewTime)
+		fmt.Printf("@%s's average review time is: %.2f hours (%d PRs)\n", username, averageReviewTime, len(durations))
 	}
 	averageAggregatedDurationInHours := calculateAggregatedAverageReviewTime(sumAggregatedDurationInHours, len(stats))
 	fmt.Printf("\nAggregated PR review duration is: %.2f hours (From %d Devs)\n", averageAggregatedDurationInHours, len(stats))
