@@ -3,7 +3,6 @@ package gh
 import (
 	"context"
 	"fmt"
-	"math"
 
 	"github.com/aogz/perforator/utils"
 	"github.com/google/go-github/v40/github"
@@ -12,7 +11,9 @@ import (
 const MAX_PER_PAGE = 100
 
 // GetPRs returns a list of tickets filtered by label for specified repo
-func GetPRs(client *github.Client, owner string, repo string, limit int) ([]*github.PullRequest, error) {
+func GetPRs(client *github.Client, owner string, repo string, limit int, skip int) ([]*github.PullRequest, error) {
+	total := limit + skip
+
 	options := &github.PullRequestListOptions{
 		State: "closed",
 		ListOptions: github.ListOptions{
@@ -21,30 +22,30 @@ func GetPRs(client *github.Client, owner string, repo string, limit int) ([]*git
 		},
 	}
 
+	pages := 1
 	var pullRequestList []*github.PullRequest
-	if limit > MAX_PER_PAGE {
-		pages := int(math.Ceil(float64(limit) / float64(MAX_PER_PAGE)))
-		for page := 1; page <= pages; page++ {
-			utils.ClearPrint(fmt.Sprintf("Retrieving pull requests.. %d/%d", page, pages))
-			options.ListOptions.Page = page
-			if page == pages {
-				options.ListOptions.PerPage = limit - page*MAX_PER_PAGE - MAX_PER_PAGE
-			} else {
-				options.ListOptions.PerPage = MAX_PER_PAGE
-			}
-			prs, _, err := client.PullRequests.List(context.Background(), owner, repo, options)
-			if err != nil {
-				return pullRequestList, err
-			}
-			pullRequestList = append(pullRequestList, prs...)
+	if total > MAX_PER_PAGE {
+		pages = total / MAX_PER_PAGE
+		if total%MAX_PER_PAGE > 0 {
+			pages += 1
 		}
-	} else {
-		utils.ClearPrint("Retrieving pull requests..")
+	}
+
+	for page := 1; page <= pages; page++ {
+		utils.ClearPrint(fmt.Sprintf("Retrieving pull requests.. %d/%d", page, pages))
+		options.ListOptions.Page = page
+		if page == pages {
+			options.ListOptions.PerPage = total % MAX_PER_PAGE
+		} else {
+			options.ListOptions.PerPage = MAX_PER_PAGE
+		}
+
 		prs, _, err := client.PullRequests.List(context.Background(), owner, repo, options)
 		if err != nil {
-			return prs, err
+			return pullRequestList, err
 		}
-		pullRequestList = append(pullRequestList, prs...)
+
+		pullRequestList = append(pullRequestList, prs[:options.ListOptions.PerPage]...)
 	}
 
 	return pullRequestList, nil

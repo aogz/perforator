@@ -13,14 +13,6 @@ const (
 	reviewTime    string = "review-time"
 )
 
-func addDefaultArgs(subcommand *flag.FlagSet) (*string, *int) {
-	repo := subcommand.String("repo", "", "Repository in format owner/repo, e.g. facebook/react")
-	limit := subcommand.Int("limit", 10, "Limit to last X PRs")
-	subcommand.Parse(os.Args[2:])
-
-	return repo, limit
-}
-
 func main() {
 	utils.AddHelp()
 	utils.ValidateArgs()
@@ -29,15 +21,15 @@ func main() {
 	switch command {
 	case rejectionRate:
 		prRejectionRateCmd := flag.NewFlagSet(rejectionRate, flag.ExitOnError)
-		repo, limit := addDefaultArgs(prRejectionRateCmd)
-		owner, repoName := utils.ParseRepo(*repo)
-		commands.RejectionRate(owner, repoName, *limit)
+		args := utils.AddDefaultArgs(prRejectionRateCmd)
+		owner, repoName := utils.ParseRepo(args.Repo)
+		commands.RejectionRate(owner, repoName, args.Limit, args.Skip)
 	case reviewTime:
 		prReviewTimeCmd := flag.NewFlagSet(reviewTime, flag.ExitOnError)
 		groupBy := prReviewTimeCmd.String("group-by", "reviewer", "Criteria to group by. Accepted values: author or reviewer")
-		repo, limit := addDefaultArgs(prReviewTimeCmd)
-		owner, repoName := utils.ParseRepo(*repo)
-		commands.ReviewTime(owner, repoName, *limit, *groupBy)
+		args := utils.AddDefaultArgs(prReviewTimeCmd)
+		owner, repoName := utils.ParseRepo(args.Repo)
+		commands.ReviewTime(owner, repoName, args.Limit, args.Skip, *groupBy)
 	default:
 		utils.PrintHelp()
 	}

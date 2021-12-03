@@ -10,9 +10,9 @@ import (
 )
 
 // ReviewTime shows average review time per pr author or reviewer
-func ReviewTime(owner string, repo string, limit int, groupBy string) {
+func ReviewTime(owner string, repo string, limit int, skip int, groupBy string) {
 	client := gh.GetClient()
-	prs, err := gh.GetPRs(client, owner, repo, limit)
+	prs, err := gh.GetPRs(client, owner, repo, limit, skip)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -34,11 +34,10 @@ func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.
 			fmt.Println("PR is not merged yet, skipping..")
 			continue
 		}
-		username := *pr.User.Login
-		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, username))
+		utils.ClearPrintPRInfo(i, limit, pr)
 		inReviewTime := calculatePRInReviewTime(client, pr)
 		if inReviewTime > 0 {
-			stats[username] = append(stats[username], inReviewTime)
+			stats[*pr.User.Login] = append(stats[*pr.User.Login], inReviewTime)
 		}
 	}
 
@@ -47,7 +46,7 @@ func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.
 
 func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
-		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, *pr.Number, *pr.CreatedAt, *pr.User.Login))
+		utils.ClearPrintPRInfo(i, limit, pr)
 		if pr.MergedAt == nil {
 			fmt.Println("PR is not merged yet, skipping..")
 			continue
@@ -66,7 +65,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 			case "review_requested":
 				eventCreatedAt := *event.CreatedAt
 				reviewer := *event.Reviewer.Login
-				fmt.Println("Review requested from:", reviewer)
+				fmt.Println("\tReview requested from:", reviewer)
 				if _, ok := reviewPerUser[reviewer]; !ok {
 					reviewPerUser[reviewer] = map[string]interface{}{
 						"inReviewTime": time.Duration(0),
@@ -80,7 +79,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 					reviewer = *event.User.Login
 					eventTime = *event.SubmittedAt
 					if _, ok := reviewPerUser[reviewer]; !ok {
-						fmt.Println("Skipping review from, not requested:", reviewer)
+						fmt.Println("\tSkipping review (not requested):", reviewer)
 						continue
 					}
 					reviewPerUser[reviewer]["reviewed"] = true
@@ -96,7 +95,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 		}
 
 		for reviewer, reviewerStats := range reviewPerUser {
-			fmt.Printf("\tProcessing %s's review", reviewer)
+			fmt.Printf("\tProcessing %s's review\n", reviewer)
 			if isReviewed, ok := reviewPerUser[reviewer]["reviewed"]; !ok || !isReviewed.(bool) {
 				mergetAt := *pr.MergedAt
 				lastEvent := reviewPerUser[reviewer]["previousReviewPeriodStartTime"].(time.Time)
@@ -105,6 +104,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 			}
 			stats[reviewer] = append(stats[reviewer], reviewerStats["inReviewTime"].(time.Duration))
 		}
+		fmt.Println("")
 	}
 
 	return stats

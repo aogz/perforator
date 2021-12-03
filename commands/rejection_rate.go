@@ -19,8 +19,8 @@ type UserRejectionRateStatistic struct {
 }
 
 // RejectionRate shows percentage of rejected PRs
-func RejectionRate(owner string, repo string, limit int) {
-	stats := getStatsByUser(owner, repo, limit)
+func RejectionRate(owner string, repo string, limit int, skip int) {
+	stats := getStatsByUser(owner, repo, limit, skip)
 	utils.ClearPrint("-----")
 	if stats != nil {
 		aggregatedRate := calculateAggregatedRate(stats)
@@ -29,10 +29,10 @@ func RejectionRate(owner string, repo string, limit int) {
 }
 
 // Helper methods
-func getStatsByUser(owner string, repo string, limit int) map[string]UserRejectionRateStatistic {
+func getStatsByUser(owner string, repo string, limit int, skip int) map[string]UserRejectionRateStatistic {
 	client := gh.GetClient()
 
-	prs, err := gh.GetPRs(client, owner, repo, limit)
+	prs, err := gh.GetPRs(client, owner, repo, limit, skip)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil
@@ -42,10 +42,8 @@ func getStatsByUser(owner string, repo string, limit int) map[string]UserRejecti
 	for i, pr := range prs {
 		username := *pr.User.Login
 		prNumber := *pr.Number
-		prCreateAt := *pr.CreatedAt
 
-		utils.ClearPrint(fmt.Sprintf("%d/%d Processing PR #%d created at %s by %s", i+1, limit, prNumber, prCreateAt, username))
-
+		utils.ClearPrintPRInfo(i, limit, pr)
 		tryCreateUserStats(statsByUser, username)
 		userStats := statsByUser[username]
 		userStats.Total += 1
