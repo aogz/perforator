@@ -34,18 +34,35 @@ func GetPRs(client *github.Client, owner string, repo string, limit int, skip in
 	for page := 1; page <= pages; page++ {
 		utils.ClearPrint(fmt.Sprintf("Retrieving pull requests.. %d/%d", page, pages))
 		options.ListOptions.Page = page
-		if page == pages {
-			options.ListOptions.PerPage = total % MAX_PER_PAGE
-		} else {
-			options.ListOptions.PerPage = MAX_PER_PAGE
-		}
+		options.ListOptions.PerPage = MAX_PER_PAGE
 
 		prs, _, err := client.PullRequests.List(context.Background(), owner, repo, options)
 		if err != nil {
 			return pullRequestList, err
 		}
 
-		pullRequestList = append(pullRequestList, prs[:options.ListOptions.PerPage]...)
+		// handle skip
+		startSlice := 0
+		endSlice := options.ListOptions.PerPage
+		if skip > 0 {
+			if skip > endSlice {
+				skip -= endSlice
+				continue
+			} else {
+				startSlice = skip
+				skip = 0
+			}
+		}
+
+		// calculate remainder in the last page
+		if page == pages {
+			remainder := total % MAX_PER_PAGE
+			if remainder > 0 {
+				endSlice = remainder
+			}
+		}
+
+		pullRequestList = append(pullRequestList, prs[startSlice:endSlice]...)
 	}
 
 	return pullRequestList, nil

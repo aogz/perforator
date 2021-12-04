@@ -31,7 +31,7 @@ func ReviewTime(owner string, repo string, limit int, skip int, groupBy string) 
 func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
 	for i, pr := range prs {
 		if pr.MergedAt == nil {
-			fmt.Println("PR is not merged yet, skipping..")
+			fmt.Println("\tPR is not merged yet, skipping..")
 			continue
 		}
 		utils.ClearPrintPRInfo(i, limit, pr)
@@ -48,7 +48,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 	for i, pr := range prs {
 		utils.ClearPrintPRInfo(i, limit, pr)
 		if pr.MergedAt == nil {
-			fmt.Println("PR is not merged yet, skipping..")
+			fmt.Println("\tPR is not merged yet, skipping..")
 			continue
 		}
 
