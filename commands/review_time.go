@@ -10,7 +10,7 @@ import (
 )
 
 // ReviewTime shows average review time per pr author or reviewer
-func ReviewTime(owner string, repo string, limit int, skip int, groupBy string) {
+func ReviewTime(owner string, repo string, limit int, skip int, groupBy string, contributors []string) {
 	client := gh.GetClient()
 	prs, err := gh.GetPRs(client, owner, repo, limit, skip)
 	if err != nil {
@@ -20,31 +20,38 @@ func ReviewTime(owner string, repo string, limit int, skip int, groupBy string) 
 
 	stats := map[string][]time.Duration{}
 	if groupBy == "author" {
-		stats = calculateReviewTimeByAuthor(client, stats, prs, limit)
+		stats = calculateReviewTimeByAuthor(client, stats, prs, limit, contributors)
 	} else {
-		stats = calculateReviewTimeByReviewer(client, stats, prs, limit)
+		stats = calculateReviewTimeByReviewer(client, stats, prs, limit, contributors)
 	}
 
 	calculateAggregatedResultsPerUser(stats)
 }
 
-func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
+func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int, contributors []string) map[string][]time.Duration {
 	for i, pr := range prs {
+		utils.ClearPrintPRInfo(i, limit, pr)
 		if pr.MergedAt == nil {
 			fmt.Println("\tPR is not merged yet, skipping..")
 			continue
 		}
-		utils.ClearPrintPRInfo(i, limit, pr)
+
+		author := *pr.User.Login
+		if len(contributors) > 0 && !utils.Contains(contributors, author) {
+			fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", author)
+			continue
+		}
+
 		inReviewTime := calculatePRInReviewTime(client, pr)
 		if inReviewTime > 0 {
-			stats[*pr.User.Login] = append(stats[*pr.User.Login], inReviewTime)
+			stats[author] = append(stats[author], inReviewTime)
 		}
 	}
 
 	return stats
 }
 
-func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int) map[string][]time.Duration {
+func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]time.Duration, prs []*github.PullRequest, limit int, contributors []string) map[string][]time.Duration {
 	for i, pr := range prs {
 		utils.ClearPrintPRInfo(i, limit, pr)
 		if pr.MergedAt == nil {
@@ -65,6 +72,10 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 			case "review_requested":
 				eventCreatedAt := *event.CreatedAt
 				reviewer := *event.Reviewer.Login
+				if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
+					fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+					continue
+				}
 				fmt.Println("\tReview requested from:", reviewer)
 				if _, ok := reviewPerUser[reviewer]; !ok {
 					reviewPerUser[reviewer] = map[string]interface{}{
@@ -78,6 +89,10 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 				if eventType == "reviewed" {
 					reviewer = *event.User.Login
 					eventTime = *event.SubmittedAt
+					if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
+						fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+						continue
+					}
 					if _, ok := reviewPerUser[reviewer]; !ok {
 						fmt.Println("\tSkipping review (not requested):", reviewer)
 						continue
@@ -86,12 +101,21 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 				} else {
 					eventTime = *event.CreatedAt
 					reviewer = *event.Reviewer.Login
+					if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
+						fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+						continue
+					}
 				}
 				timeSinceLastEvent := eventTime.Sub(reviewPerUser[reviewer]["previousReviewPeriodStartTime"].(time.Time))
 				currentDuration := reviewPerUser[reviewer]["inReviewTime"].(time.Duration)
 				reviewPerUser[reviewer]["inReviewTime"] = currentDuration + timeSinceLastEvent
 				reviewPerUser[reviewer]["previousReviewPeriodStartTime"] = eventTime
 			}
+		}
+
+		if len(reviewPerUser) == 0 {
+			fmt.Println("\tNo data to process")
+			continue
 		}
 
 		for reviewer, reviewerStats := range reviewPerUser {

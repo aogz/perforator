@@ -19,8 +19,8 @@ type UserRejectionRateStatistic struct {
 }
 
 // RejectionRate shows percentage of rejected PRs
-func RejectionRate(owner string, repo string, limit int, skip int) {
-	stats := getStatsByUser(owner, repo, limit, skip)
+func RejectionRate(owner string, repo string, limit int, skip int, contributors []string) {
+	stats := getStatsByUser(owner, repo, limit, skip, contributors)
 	utils.ClearPrint("-----")
 	if stats != nil {
 		aggregatedRate := calculateAggregatedRate(stats)
@@ -29,7 +29,7 @@ func RejectionRate(owner string, repo string, limit int, skip int) {
 }
 
 // Helper methods
-func getStatsByUser(owner string, repo string, limit int, skip int) map[string]UserRejectionRateStatistic {
+func getStatsByUser(owner string, repo string, limit int, skip int, contributors []string) map[string]UserRejectionRateStatistic {
 	client := gh.GetClient()
 
 	prs, err := gh.GetPRs(client, owner, repo, limit, skip)
@@ -41,6 +41,10 @@ func getStatsByUser(owner string, repo string, limit int, skip int) map[string]U
 	statsByUser := map[string]UserRejectionRateStatistic{}
 	for i, pr := range prs {
 		username := *pr.User.Login
+		if len(contributors) > 0 && !utils.Contains(contributors, username) {
+			fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", username)
+			continue
+		}
 		prNumber := *pr.Number
 
 		utils.ClearPrintPRInfo(i, limit, pr)

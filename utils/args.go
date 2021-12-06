@@ -8,9 +8,10 @@ import (
 )
 
 type DefaultArgs struct {
-	Repo  string
-	Limit int
-	Skip  int
+	Repo         string
+	Limit        int
+	Skip         int
+	Contributors []string
 }
 
 // ParseRepo parses repo string and terminates the script if the format is incalid. Returns author and repo strings.
@@ -28,11 +29,18 @@ func AddDefaultArgs(subcommand *flag.FlagSet) DefaultArgs {
 	repo := subcommand.String("repo", "", "Repository in format owner/repo, e.g. facebook/react")
 	limit := subcommand.Int("limit", 10, "Limit to last X PRs")
 	skip := subcommand.Int("skip", 0, "Skip first X PRs")
+	only := subcommand.String("only", "", "List of contributors to be included (comma separated)")
 	subcommand.Parse(os.Args[2:])
 
+	contributors := []string{}
+	if len(*only) > 0 {
+		contributors = strings.Split(*only, ",")
+	}
+
 	return DefaultArgs{
-		Repo:  *repo,
-		Limit: *limit,
-		Skip:  *skip,
+		Repo:         *repo,
+		Limit:        *limit,
+		Skip:         *skip,
+		Contributors: contributors,
 	}
 }
