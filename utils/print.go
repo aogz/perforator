@@ -27,3 +27,12 @@ func ClearPrintPRInfo(i int, limit int, pr *github.PullRequest) {
 		),
 	)
 }
+
+func ClearPrintIssueInfo(i int, limit int, issue *github.Issue) {
+	ClearPrint(
+		fmt.Sprintf(
+			"%d/%d Processing issue #%d created at %s by %s",
+			i+1, limit, *issue.Number, *issue.CreatedAt, *issue.User.Login,
+		),
+	)
+}

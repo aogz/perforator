@@ -42,3 +42,15 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     ```bash
     $ perforator review-time --repo aogz/perforator --limit 10 --group-by reviewer 
     ```
+
+- `issue-author`: Number of issues created by author
+
+    Options:
+    - `repo`: repository name in `owner/name` format, e.g. `facebook/react` or `django/django`.
+    - `limit` (default: 10): number of PRs/tickets to collect data from.
+    - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
+
+    Examples:
+    ```bash
+    $ perforator rejection-rate --repo django/django --limit 100
+    ```

@@ -10,7 +10,7 @@ import (
 
 const MAX_PER_PAGE = 100
 
-// GetPRs returns a list of tickets filtered by label for specified repo
+// GetPRs returns a list of pull requests filtered by label for specified repo
 func GetPRs(client *github.Client, owner string, repo string, limit int, skip int) ([]*github.PullRequest, error) {
 	total := limit + skip
 
@@ -66,6 +66,64 @@ func GetPRs(client *github.Client, owner string, repo string, limit int, skip in
 	}
 
 	return pullRequestList, nil
+}
+
+// GetIssuesByRepo returns a list of tickets filtered by label for specified repo
+func GetIssuesByRepo(client *github.Client, owner string, repo string, limit int, skip int) ([]*github.Issue, error) {
+	total := limit + skip
+
+	options := &github.IssueListByRepoOptions{
+		State: "all",
+		ListOptions: github.ListOptions{
+			Page:    1,
+			PerPage: limit,
+		},
+	}
+
+	pages := 1
+	var issuesList []*github.Issue
+	if total > MAX_PER_PAGE {
+		pages = total / MAX_PER_PAGE
+		if total%MAX_PER_PAGE > 0 {
+			pages += 1
+		}
+	}
+
+	for page := 1; page <= pages; page++ {
+		utils.ClearPrint(fmt.Sprintf("Retrieving issues.. %d/%d", page, pages))
+		options.ListOptions.Page = page
+		options.ListOptions.PerPage = MAX_PER_PAGE
+
+		issues, _, err := client.Issues.ListByRepo(context.Background(), owner, repo, options)
+		if err != nil {
+			return issuesList, err
+		}
+
+		// handle skip
+		startSlice := 0
+		endSlice := options.ListOptions.PerPage
+		if skip > 0 {
+			if skip > endSlice {
+				skip -= endSlice
+				continue
+			} else {
+				startSlice = skip
+				skip = 0
+			}
+		}
+
+		// calculate remainder in the last page
+		if page == pages {
+			remainder := total % MAX_PER_PAGE
+			if remainder > 0 {
+				endSlice = remainder
+			}
+		}
+
+		issuesList = append(issuesList, issues[startSlice:endSlice]...)
+	}
+
+	return issuesList, nil
 }
 
 // GetPullRequestTimeline ...

@@ -11,6 +11,7 @@ import (
 const (
 	rejectionRate string = "rejection-rate"
 	reviewTime    string = "review-time"
+	issueAuthor   string = "issue-author"
 )
 
 func main() {
@@ -30,6 +31,11 @@ func main() {
 		args := utils.AddDefaultArgs(prReviewTimeCmd)
 		owner, repoName := utils.ParseRepo(args.Repo)
 		commands.ReviewTime(owner, repoName, args.Limit, args.Skip, *groupBy, args.Contributors)
+	case issueAuthor:
+		prRejectionRateCmd := flag.NewFlagSet(rejectionRate, flag.ExitOnError)
+		args := utils.AddDefaultArgs(prRejectionRateCmd)
+		owner, repoName := utils.ParseRepo(args.Repo)
+		commands.IssueAuthor(owner, repoName, args.Limit, args.Skip, args.Contributors)
 	default:
 		utils.PrintHelp()
 	}
