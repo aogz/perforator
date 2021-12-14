@@ -16,6 +16,7 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     - `repo`: repository name in `owner/name` format, e.g. `facebook/react` or `django/django`.
     - `limit` (default: 10): number of PRs/tickets to collect data from.
     - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
+    - `only`: comma-separated list of contributors, e.g. aogz,foo,bar
 
     Examples:
     ```bash
@@ -28,6 +29,7 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     - `repo`: repository name in `owner/name` format, e.g. `facebook/react` or `django/django`.
     - `limit` (default: 10): number of PRs/tickets to collect data from.
     - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
+    - `only`: comma-separated list of contributors, e.g. aogz,foo,bar
     - `group-by` (default: `reviewer`): criteria to group by. Can be one of: `author`, `reviewer`:
         
         `author`: Calculates average time PRs from specific author spends from the moment pr was created to the moment it was merged.
@@ -49,6 +51,7 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     - `repo`: repository name in `owner/name` format, e.g. `facebook/react` or `django/django`.
     - `limit` (default: 10): number of PRs/tickets to collect data from.
     - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
+    - `only`: comma-separated list of contributors, e.g. aogz,foo,bar
 
     Examples:
     ```bash
