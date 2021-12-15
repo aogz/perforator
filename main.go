@@ -32,8 +32,8 @@ func main() {
 		owner, repoName := utils.ParseRepo(args.Repo)
 		commands.ReviewTime(owner, repoName, args.Limit, args.Skip, *groupBy, args.Contributors)
 	case issueAuthor:
-		prRejectionRateCmd := flag.NewFlagSet(rejectionRate, flag.ExitOnError)
-		args := utils.AddDefaultArgs(prRejectionRateCmd)
+		issueAuthorCmd := flag.NewFlagSet(issueAuthor, flag.ExitOnError)
+		args := utils.AddDefaultArgs(issueAuthorCmd)
 		owner, repoName := utils.ParseRepo(args.Repo)
 		commands.IssueAuthor(owner, repoName, args.Limit, args.Skip, args.Contributors)
 	default:
