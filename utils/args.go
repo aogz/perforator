@@ -8,7 +8,8 @@ import (
 )
 
 type DefaultArgs struct {
-	Repo         string
+	RepoName     string
+	Owner        string
 	Limit        int
 	Skip         int
 	Contributors []string
@@ -37,8 +38,10 @@ func AddDefaultArgs(subcommand *flag.FlagSet) DefaultArgs {
 		contributors = strings.Split(*only, ",")
 	}
 
+	owner, repoName := ParseRepo(*repo)
 	return DefaultArgs{
-		Repo:         *repo,
+		RepoName:     repoName,
+		Owner:        owner,
 		Limit:        *limit,
 		Skip:         *skip,
 		Contributors: contributors,

@@ -18,24 +18,18 @@ func main() {
 	utils.AddHelp()
 	utils.ValidateArgs()
 
-	command := os.Args[1]
-	switch command {
+	cmd := flag.NewFlagSet(os.Args[1], flag.ExitOnError)
+	switch cmd.Name() {
 	case rejectionRate:
-		prRejectionRateCmd := flag.NewFlagSet(rejectionRate, flag.ExitOnError)
-		args := utils.AddDefaultArgs(prRejectionRateCmd)
-		owner, repoName := utils.ParseRepo(args.Repo)
-		commands.RejectionRate(owner, repoName, args.Limit, args.Skip, args.Contributors)
+		args := utils.AddDefaultArgs(cmd)
+		commands.RejectionRate(args)
 	case reviewTime:
-		prReviewTimeCmd := flag.NewFlagSet(reviewTime, flag.ExitOnError)
-		groupBy := prReviewTimeCmd.String("group-by", "reviewer", "Criteria to group by. Accepted values: author or reviewer")
-		args := utils.AddDefaultArgs(prReviewTimeCmd)
-		owner, repoName := utils.ParseRepo(args.Repo)
-		commands.ReviewTime(owner, repoName, args.Limit, args.Skip, *groupBy, args.Contributors)
+		groupBy := cmd.String("group-by", "reviewer", "Criteria to group by. Accepted values: author or reviewer")
+		args := utils.AddDefaultArgs(cmd)
+		commands.ReviewTime(args, *groupBy)
 	case issueAuthor:
-		issueAuthorCmd := flag.NewFlagSet(issueAuthor, flag.ExitOnError)
-		args := utils.AddDefaultArgs(issueAuthorCmd)
-		owner, repoName := utils.ParseRepo(args.Repo)
-		commands.IssueAuthor(owner, repoName, args.Limit, args.Skip, args.Contributors)
+		args := utils.AddDefaultArgs(cmd)
+		commands.IssueAuthor(args)
 	default:
 		utils.PrintHelp()
 	}

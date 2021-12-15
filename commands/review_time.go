@@ -10,9 +10,9 @@ import (
 )
 
 // ReviewTime shows average review time per pr author or reviewer
-func ReviewTime(owner string, repo string, limit int, skip int, groupBy string, contributors []string) {
+func ReviewTime(args utils.DefaultArgs, groupBy string) {
 	client := gh.GetClient()
-	prs, err := gh.GetPRs(client, owner, repo, limit, skip)
+	prs, err := gh.GetPRs(client, args.Owner, args.RepoName, args.Limit, args.Skip)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -20,9 +20,9 @@ func ReviewTime(owner string, repo string, limit int, skip int, groupBy string, 
 
 	stats := map[string][]time.Duration{}
 	if groupBy == "author" {
-		stats = calculateReviewTimeByAuthor(client, stats, prs, limit, contributors)
+		stats = calculateReviewTimeByAuthor(client, stats, prs, args.Limit, args.Contributors)
 	} else {
-		stats = calculateReviewTimeByReviewer(client, stats, prs, limit, contributors)
+		stats = calculateReviewTimeByReviewer(client, stats, prs, args.Limit, args.Contributors)
 	}
 
 	calculateAggregatedResultsPerUser(stats)
