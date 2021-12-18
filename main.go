@@ -12,6 +12,7 @@ const (
 	rejectionRate string = "rejection-rate"
 	reviewTime    string = "review-time"
 	issueAuthor   string = "issue-author"
+	issueLabels   string = "issue-labels"
 )
 
 func main() {
@@ -30,6 +31,9 @@ func main() {
 	case issueAuthor:
 		args := utils.AddDefaultArgs(cmd)
 		commands.IssueAuthor(args)
+	case issueLabels:
+		args := utils.AddDefaultArgs(cmd)
+		commands.IssueLabels(args)
 	default:
 		utils.PrintHelp()
 	}
