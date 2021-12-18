@@ -38,7 +38,7 @@ func calculateReviewTimeByAuthor(client *github.Client, stats map[string][]time.
 
 		author := *pr.User.Login
 		if len(contributors) > 0 && !utils.Contains(contributors, author) {
-			fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", author)
+			fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", author)
 			continue
 		}
 
@@ -73,7 +73,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 				eventCreatedAt := *event.CreatedAt
 				reviewer := *event.Reviewer.Login
 				if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
-					fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+					fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", reviewer)
 					continue
 				}
 				fmt.Println("\tReview requested from:", reviewer)
@@ -90,7 +90,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 					reviewer = *event.User.Login
 					eventTime = *event.SubmittedAt
 					if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
-						fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+						fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", reviewer)
 						continue
 					}
 					if _, ok := reviewPerUser[reviewer]; !ok {
@@ -102,7 +102,7 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 					eventTime = *event.CreatedAt
 					reviewer = *event.Reviewer.Login
 					if len(contributors) > 0 && !utils.Contains(contributors, reviewer) {
-						fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", reviewer)
+						fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", reviewer)
 						continue
 					}
 				}

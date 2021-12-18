@@ -30,12 +30,12 @@ func AddDefaultArgs(subcommand *flag.FlagSet) DefaultArgs {
 	repo := subcommand.String("repo", "", "Repository in format owner/repo, e.g. facebook/react")
 	limit := subcommand.Int("limit", 10, "Limit to last X PRs")
 	skip := subcommand.Int("skip", 0, "Skip first X PRs")
-	only := subcommand.String("only", "", "List of contributors to be included (comma separated)")
+	contributors := subcommand.String("contributors", "", "List of contributors to be included (comma separated)")
 	subcommand.Parse(os.Args[2:])
 
 	contributors := []string{}
-	if len(*only) > 0 {
-		contributors = strings.Split(*only, ",")
+	if len(*contributors) > 0 {
+		contributors = strings.Split(*contributors, ",")
 	}
 
 	owner, repoName := ParseRepo(*repo)

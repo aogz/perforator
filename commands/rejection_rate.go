@@ -42,7 +42,7 @@ func getStatsByUser(args utils.DefaultArgs) map[string]UserRejectionRateStatisti
 	for i, pr := range prs {
 		username := *pr.User.Login
 		if len(args.Contributors) > 0 && !utils.Contains(args.Contributors, username) {
-			fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", username)
+			fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", username)
 			continue
 		}
 		prNumber := *pr.Number

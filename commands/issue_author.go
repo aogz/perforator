@@ -20,7 +20,7 @@ func IssueAuthor(args utils.DefaultArgs) {
 	for i, issue := range issues {
 		author := *issue.User.Login
 		if len(args.Contributors) > 0 && !utils.Contains(args.Contributors, author) {
-			fmt.Printf("\t%s is not in the list of contributors (--only param), skipping..\n", author)
+			fmt.Printf("\t%s is not in the list of contributors (--contributors param), skipping..\n", author)
 			continue
 		}
 
