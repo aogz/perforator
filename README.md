@@ -55,5 +55,18 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
 
     Examples:
     ```bash
-    $ perforator rejection-rate --repo django/django --limit 100
+    $ perforator issue-author --repo django/django --limit 100
+    ```
+
+- `issue-labels`: Number of issues grouped by labels
+
+    Options:
+    - `repo`: repository name in `owner/name` format, e.g. `facebook/react` or `django/django`.
+    - `limit` (default: 10): number of PRs/tickets to collect data from.
+    - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
+    - `only`: comma-separated list of contributors, e.g. aogz,foo,bar
+
+    Examples:
+    ```bash
+    $ perforator issue-labels --repo django/django --limit 100
     ```
