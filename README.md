@@ -52,6 +52,8 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     - `limit` (default: 10): number of PRs/tickets to collect data from.
     - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
     - `contributors`: comma-separated list of contributors, e.g. aogz,foo,bar
+    - `labels`: comma-separated list of labels, e.g. bug,feature
+    - `state`: state of the issues to count, e.g. `all`,`open`, `closed`
 
     Examples:
     ```bash
@@ -65,6 +67,8 @@ This tool heavily relies on Github API, so [GITHUB_ACCESS_TOKEN](https://github.
     - `limit` (default: 10): number of PRs/tickets to collect data from.
     - `skip` (default: 0): number of PRs/tickets to skip from the beggining of the list.
     - `contributors`: comma-separated list of contributors, e.g. aogz,foo,bar
+    - `labels`: comma-separated list of labels, e.g. bug,feature
+    - `state`: state of the issues to count, e.g. `all`,`open`, `closed`
 
     Examples:
     ```bash

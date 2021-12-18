@@ -69,14 +69,14 @@ func GetPRs(client *github.Client, owner string, repo string, limit int, skip in
 }
 
 // GetIssuesByRepo returns a list of tickets filtered by label for specified repo
-func GetIssuesByRepo(client *github.Client, owner string, repo string, limit int, skip int) ([]*github.Issue, error) {
-	total := limit + skip
+func GetIssuesByRepo(client *github.Client, args utils.DefaultArgs, state string) ([]*github.Issue, error) {
+	total := args.Limit + args.Skip
 
 	options := &github.IssueListByRepoOptions{
-		State: "all",
+		State: state,
 		ListOptions: github.ListOptions{
 			Page:    1,
-			PerPage: limit,
+			PerPage: args.Limit,
 		},
 	}
 
@@ -94,7 +94,7 @@ func GetIssuesByRepo(client *github.Client, owner string, repo string, limit int
 		options.ListOptions.Page = page
 		options.ListOptions.PerPage = MAX_PER_PAGE
 
-		issues, _, err := client.Issues.ListByRepo(context.Background(), owner, repo, options)
+		issues, _, err := client.Issues.ListByRepo(context.Background(), args.Owner, args.RepoName, options)
 		if err != nil {
 			return issuesList, err
 		}
@@ -102,6 +102,7 @@ func GetIssuesByRepo(client *github.Client, owner string, repo string, limit int
 		// handle skip
 		startSlice := 0
 		endSlice := options.ListOptions.PerPage
+		skip := args.Skip
 		if skip > 0 {
 			if skip > endSlice {
 				skip -= endSlice

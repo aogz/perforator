@@ -8,9 +8,9 @@ import (
 )
 
 // IssueLabels shows number of issues created by each author
-func IssueLabels(args utils.DefaultArgs) {
+func IssueLabels(args utils.DefaultArgs, labels []string, state string) {
 	client := gh.GetClient()
-	issues, err := gh.GetIssuesByRepo(client, args.Owner, args.RepoName, args.Limit, args.Skip)
+	issues, err := gh.GetIssuesByRepo(client, args, state)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -26,7 +26,14 @@ func IssueLabels(args utils.DefaultArgs) {
 
 		utils.ClearPrintIssueInfo(i, args.Limit, issue)
 		for _, label := range issue.Labels {
-			stats[*label.Name]++
+			labelName := *label.Name
+			if len(labels) > 0 {
+				if utils.Contains(labels, labelName) {
+					stats[labelName]++
+				}
+			} else {
+				stats[labelName]++
+			}
 		}
 	}
 

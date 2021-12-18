@@ -26,24 +26,26 @@ func ParseRepo(repo string) (string, string) {
 	return parts[0], parts[1]
 }
 
+func ParseCommaSeparatedValue(arg string) []string {
+	if len(arg) == 0 {
+		return []string{}
+	}
+
+	return strings.Split(arg, ",")
+}
+
 func AddDefaultArgs(subcommand *flag.FlagSet) DefaultArgs {
 	repo := subcommand.String("repo", "", "Repository in format owner/repo, e.g. facebook/react")
 	limit := subcommand.Int("limit", 10, "Limit to last X PRs")
 	skip := subcommand.Int("skip", 0, "Skip first X PRs")
 	contributors := subcommand.String("contributors", "", "List of contributors to be included (comma separated)")
 	subcommand.Parse(os.Args[2:])
-
-	contributors := []string{}
-	if len(*contributors) > 0 {
-		contributors = strings.Split(*contributors, ",")
-	}
-
 	owner, repoName := ParseRepo(*repo)
 	return DefaultArgs{
 		RepoName:     repoName,
 		Owner:        owner,
 		Limit:        *limit,
 		Skip:         *skip,
-		Contributors: contributors,
+		Contributors: ParseCommaSeparatedValue(*contributors),
 	}
 }

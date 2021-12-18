@@ -29,11 +29,15 @@ func main() {
 		args := utils.AddDefaultArgs(cmd)
 		commands.ReviewTime(args, *groupBy)
 	case issueAuthor:
+		labels := cmd.String("labels", "", "Comma separated list of labels to filter by")
+		state := cmd.String("state", "all", "State of the issues to filter by. Accepted values: all, open, closed")
 		args := utils.AddDefaultArgs(cmd)
-		commands.IssueAuthor(args)
+		commands.IssueAuthor(args, utils.ParseCommaSeparatedValue(*labels), *state)
 	case issueLabels:
+		labels := cmd.String("labels", "", "Comma separated list of labels to filter by")
+		state := cmd.String("state", "all", "State of the issues to filter by. Accepted values: all, open, closed")
 		args := utils.AddDefaultArgs(cmd)
-		commands.IssueLabels(args)
+		commands.IssueLabels(args, utils.ParseCommaSeparatedValue(*labels), *state)
 	default:
 		utils.PrintHelp()
 	}
