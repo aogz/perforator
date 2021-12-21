@@ -137,13 +137,15 @@ func calculateReviewTimeByReviewer(client *github.Client, stats map[string][]tim
 func calculateAggregatedResultsPerUser(stats map[string][]time.Duration) float64 {
 	utils.ClearPrint("-----")
 	var sumAggregatedDurationInHours float64
+	totalPRs := 0
 	for username, durations := range stats {
 		averageReviewTime := calculateAverageReviewTimePerUser(durations)
 		sumAggregatedDurationInHours += averageReviewTime
+		totalPRs += len(durations)
 		fmt.Printf("@%s's average review time is: %.2f hours (%d PRs)\n", username, averageReviewTime, len(durations))
 	}
 	averageAggregatedDurationInHours := calculateAggregatedAverageReviewTime(sumAggregatedDurationInHours, len(stats))
-	fmt.Printf("\nAggregated PR review duration is: %.2f hours (From %d Devs)\n", averageAggregatedDurationInHours, len(stats))
+	fmt.Printf("\nAggregated PR review duration is: %.2f hours (From %d Devs, %d Reviews/PRs)\n", averageAggregatedDurationInHours, len(stats), totalPRs)
 	return averageAggregatedDurationInHours
 }
 
