@@ -3,6 +3,7 @@ package gh
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aogz/perforator/utils"
 	"github.com/google/go-github/v40/github"
@@ -147,4 +148,14 @@ func GetPullRequestReviews(client *github.Client, owner string, repo string, prN
 func GetPullRequest(client *github.Client, owner string, repo string, prNumber int) (*github.PullRequest, error) {
 	pr, _, err := client.PullRequests.Get(context.Background(), owner, repo, prNumber)
 	return pr, err
+}
+
+func GetCommits(client *github.Client, owner string, repo string, author string, since, until time.Time) ([]*github.RepositoryCommit, error) {
+	options := &github.CommitsListOptions{
+		Author: author,
+		Since:  since,
+		Until:  until,
+	}
+	commits, _, err := client.Repositories.ListCommits(context.Background(), owner, repo, options)
+	return commits, err
 }

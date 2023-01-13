@@ -13,6 +13,7 @@ const (
 	reviewTime    string = "review-time"
 	issueAuthor   string = "issue-author"
 	issueLabels   string = "issue-labels"
+	commitsAuthor string = "commits"
 )
 
 func main() {
@@ -38,6 +39,10 @@ func main() {
 		state := cmd.String("state", "all", "State of the issues to filter by. Accepted values: all, open, closed")
 		args := utils.AddDefaultArgs(cmd)
 		commands.IssueLabels(args, utils.ParseCommaSeparatedValue(*labels), *state)
+	case commitsAuthor:
+		daysAgo := cmd.Int("days-ago", 1, "Days ago (default: 1 (yesterday))")
+		args := utils.AddDefaultArgs(cmd)
+		commands.CommitsAuthor(args, *daysAgo)
 	default:
 		utils.PrintHelp()
 	}
