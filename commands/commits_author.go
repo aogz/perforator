@@ -17,8 +17,7 @@ func CommitsAuthor(args utils.DefaultArgs, daysAgo int, explain bool) {
 	timeDelta := -24 * time.Hour * time.Duration(daysAgo)
 	sinceWithTime := time.Now().Add(timeDelta)
 	since := time.Date(sinceWithTime.Year(), sinceWithTime.Month(), sinceWithTime.Day(), 0, 0, 0, 0, time.Local)
-	untilWithTime := time.Now()
-	until := time.Date(untilWithTime.Year(), untilWithTime.Month(), untilWithTime.Day(), 23, 59, 59, 59, time.Local)
+	until := sinceWithTime.Add(24 * time.Hour)
 
 	for i, contributor := range args.Contributors {
 		commits, err := gh.GetCommits(client, args.Owner, args.RepoName, contributor, since, until)

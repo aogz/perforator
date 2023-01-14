@@ -29,7 +29,7 @@ func DaVinciRequest(text string) (string, error) {
 		"model":             "text-davinci-003",
 		"prompt":            text,
 		"temperature":       0,
-		"max_tokens":        60,
+		"max_tokens":        1024,
 		"top_p":             1,
 		"frequency_penalty": 0.5,
 		"presence_penalty":  0,
