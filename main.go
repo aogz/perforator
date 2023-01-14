@@ -41,8 +41,9 @@ func main() {
 		commands.IssueLabels(args, utils.ParseCommaSeparatedValue(*labels), *state)
 	case commitsAuthor:
 		daysAgo := cmd.Int("days-ago", 1, "Days ago (default: 1 (yesterday))")
+		explain := cmd.Bool("explain", false, "Explain commit messages in a human friendly way using Chat GPT")
 		args := utils.AddDefaultArgs(cmd)
-		commands.CommitsAuthor(args, *daysAgo)
+		commands.CommitsAuthor(args, *daysAgo, *explain)
 	default:
 		utils.PrintHelp()
 	}
