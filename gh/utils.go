@@ -159,3 +159,19 @@ func GetCommits(client *github.Client, owner string, repo string, author string,
 	commits, _, err := client.Repositories.ListCommits(context.Background(), owner, repo, options)
 	return commits, err
 }
+
+func GetActivity(client *github.Client, author string) ([]*github.Event, error) {
+	options := &github.ListOptions{
+		PerPage: MAX_PER_PAGE,
+	}
+	events, _, err := client.Activity.ListEventsPerformedByUser(context.Background(), author, false, options)
+	return events, err
+}
+
+func GetRepositoryActivity(client *github.Client, owner string, repo string) ([]*github.Event, error) {
+	options := &github.ListOptions{
+		PerPage: MAX_PER_PAGE,
+	}
+	events, _, err := client.Activity.ListRepositoryEvents(context.Background(), owner, repo, options)
+	return events, err
+}

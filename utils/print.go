@@ -36,3 +36,17 @@ func ClearPrintIssueInfo(i int, limit int, issue *github.Issue) {
 		),
 	)
 }
+
+// PrintList prints a list of strings
+func PrintList(title string, list []string) string {
+	result := fmt.Sprintf("\t%s (%d)\n", title, len(list))
+
+	if len(list) == 0 {
+		result += fmt.Sprintf("\t\t -----\n")
+	}
+	for i, item := range list {
+		result += fmt.Sprintf("\t\t%d: %s\n", i+1, item)
+	}
+
+	return result
+}

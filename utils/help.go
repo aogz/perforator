@@ -17,6 +17,8 @@ Commands:
 	issue-author	Calculate number of issues created by author.
 	issue-labels	Calculate number of issues grouped by labels.
 	commits			Returns commits made by a specified contributor.
+	activity		Returns activity created by a specified contributor.
+	repo-activity	Returns activity for a specific repository.
 
 Flags:
 	--help: Prints help information.

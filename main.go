@@ -14,6 +14,8 @@ const (
 	issueAuthor   string = "issue-author"
 	issueLabels   string = "issue-labels"
 	commitsAuthor string = "commits"
+	activity      string = "activity"
+	repoActivity  string = "repo-activity"
 )
 
 func main() {
@@ -44,6 +46,16 @@ func main() {
 		explain := cmd.Bool("explain", false, "Explain commit messages in a human friendly way using Chat GPT")
 		args := utils.AddDefaultArgs(cmd)
 		commands.CommitsAuthor(args, *daysAgo, *explain)
+	case activity:
+		sinceDaysAgo := cmd.Int("since-days-ago", 1, "Since days ago (default: 1 (since yesterday))")
+		explain := cmd.Bool("explain", false, "Explain messages in a human friendly way using Chat GPT")
+		args := utils.AddDefaultArgs(cmd)
+		commands.UsersActivity(args, *sinceDaysAgo, *explain)
+	case repoActivity:
+		sinceDaysAgo := cmd.Int("since-days-ago", 1, "Since days ago (default: 1 (since yesterday))")
+		explain := cmd.Bool("explain", false, "Explain messages in a human friendly way using Chat GPT")
+		args := utils.AddDefaultArgs(cmd)
+		commands.RepositoryActivity(args, *sinceDaysAgo, *explain)
 	default:
 		utils.PrintHelp()
 	}
