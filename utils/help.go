@@ -13,9 +13,10 @@ Usage:
 
 Commands:
 	rejection-rate	Calculate the aggregated rejection rate of pull requests grouped by contibutor.
-	review-time	Calculate the aggregated review time of pull requests grouped by author/reviewer.
+	review-time		Calculate the aggregated review time of pull requests grouped by author/reviewer.
 	issue-author	Calculate number of issues created by author.
 	issue-labels	Calculate number of issues grouped by labels.
+	commits			Returns commits made by a specified contributor.
 
 Flags:
 	--help: Prints help information.
